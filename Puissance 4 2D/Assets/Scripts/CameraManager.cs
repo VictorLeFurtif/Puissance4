@@ -6,6 +6,19 @@ using UnityEngine;
 public class CameraManager : MonoBehaviour
 {
     [SerializeField] private Transform cameraTransform;
+    public static CameraManager instance;
+    
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
     
     private void Start()
     {
