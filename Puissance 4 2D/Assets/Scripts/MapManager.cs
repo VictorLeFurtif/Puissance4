@@ -96,25 +96,28 @@ public class MapManager : MonoBehaviour
     private bool CheckForH(int x, int y)
     {
         var tileStateCurrently = mapArray[x, y];
+        Debug.Log("case testée "+(x)+" y="+y);
         int cpt = 1;
         for (var i = x; i < x+3; i++)
         {
-            Debug.Log(cpt);
-            if (i < 0) return false;
+            if (i < 0) break;
             if (x + i > w) break;
-            if (mapArray[x + i, y] != tileStateCurrently) return false;
+            if (mapArray[x + i, y] != tileStateCurrently) break;
+            Debug.Log("case avant "+(x+i)+" y="+y);
             cpt++;
         }
-
-        for (int i = x; i > x - (3 - cpt); i--)
+        Debug.Log("test H avant, cpt= "+cpt);
+      
+       for (int i = x; i > x - 5; i--)
         {
-            Debug.Log(cpt);
-            if (i < 0) return false;
+            if (i < 0) break;
             if (x - i < 0) break;
-            if (mapArray[x - i, y] != tileStateCurrently) return false;
+            if (mapArray[x - i, y] != tileStateCurrently) break;
+            Debug.Log("case apres "+(x-i)+" y="+y);
             cpt++; 
         }
-        return cpt >= 3;
+        Debug.Log("test H après, cpt= "+cpt);
+        return cpt >= 4;
     }
     
     private bool CheckForV(int x, int y)
