@@ -15,6 +15,7 @@ public class IaController : EntityController
         if (GameManager.instance.currentPlayer == GameManager.GameTurn.Ia)
         {
             base.PlaceJeton(turn);
+            GameManager.instance.UpdateTurnText();
         }
         
     }

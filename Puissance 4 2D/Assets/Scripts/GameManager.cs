@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    [SerializeField] private TMP_Text showTurnText;
     public static GameManager instance;
     public GameTurn currentPlayer = GameTurn.Player;
     
@@ -18,6 +20,8 @@ public class GameManager : MonoBehaviour
         {
             Destroy(gameObject);
         }
+
+        UpdateTurnText();
     }
     
     public enum GameTurn
@@ -25,6 +29,7 @@ public class GameManager : MonoBehaviour
         Player,
         Ia,
         Wait,
+        Finished,
     }
 
     public void ReloadActualScene()
@@ -32,4 +37,10 @@ public class GameManager : MonoBehaviour
         string currentSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(currentSceneName);
     }
+
+    public void UpdateTurnText()
+    {
+        showTurnText.text = "Current Player : "+ currentPlayer.ToString();
+    }
+    
 }

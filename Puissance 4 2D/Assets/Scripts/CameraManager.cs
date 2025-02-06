@@ -28,8 +28,8 @@ public class CameraManager : MonoBehaviour
 
     private void CameraPlacement()
     {
-        var x = (float)MapManager.instance.x/2;
-        var y = (float)MapManager.instance.y/2;
+        var x = (float)MapManager.instance.w/2;
+        var y = (float)MapManager.instance.h/2;
         cameraTransform.position = new Vector3(x,y,cameraTransform.position.z);
 
 

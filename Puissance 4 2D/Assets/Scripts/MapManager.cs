@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class MapManager : MonoBehaviour
@@ -10,8 +11,8 @@ public class MapManager : MonoBehaviour
     [SerializeField] private GameObject firstTile;
     [SerializeField] private GameObject secondTile;
     private bool darkerTilePreviously = false;
-    public int x = 7;
-    public int y = 6;
+    [FormerlySerializedAs("x")] public int w = 7;
+    [FormerlySerializedAs("y")] public int h = 6;
     public TileState[,] mapArray = new TileState[7,6];
     public GameObject[,] mapArrayInGame = new GameObject[7, 6];
     public static MapManager instance;
@@ -55,9 +56,9 @@ public class MapManager : MonoBehaviour
     
     private TileState[,] GenerateMapEnum()
     {
-        for (var i = 0; i < x; i++)
+        for (var i = 0; i < w; i++)
         {
-            for (var j = 0; j < y; j++)
+            for (var j = 0; j < h; j++)
             {
                 mapArray[i, j] = TileState.Empty;
             }
@@ -67,10 +68,10 @@ public class MapManager : MonoBehaviour
 
     private GameObject[,] GenerateMapGameObjects()
     {
-        for (var i = 0; i < x; i++)
+        for (var i = 0; i < w; i++)
         {
             darkerTilePreviously = !darkerTilePreviously;
-            for (var j = 0; j < y; j++)
+            for (var j = 0; j < h; j++)
             {
                 var tileToSpawn = darkerTilePreviously ? firstTile : secondTile;
                 darkerTilePreviously = !darkerTilePreviously;
@@ -80,5 +81,51 @@ public class MapManager : MonoBehaviour
             }
         }
         return mapArrayInGame;
+    }
+
+    public void CheckForWin(int x, int y,GameManager.GameTurn turn)
+    {
+        if (CheckForV(x,y) || CheckForH(x,y))
+        {
+            Debug.Log(turn + " Win");
+        }
+
+        
+    }
+
+    private bool CheckForH(int x, int y)
+    {
+        var tileStateCurrently = mapArray[x, y];
+        int cpt = 1;
+        for (var i = x; i < x+3; i++)
+        {
+            Debug.Log(cpt);
+            if (i < 0) return false;
+            if (x + i > w) break;
+            if (mapArray[x + i, y] != tileStateCurrently) return false;
+            cpt++;
+        }
+
+        for (int i = x; i > x - (3 - cpt); i--)
+        {
+            Debug.Log(cpt);
+            if (i < 0) return false;
+            if (x - i < 0) break;
+            if (mapArray[x - i, y] != tileStateCurrently) return false;
+            cpt++; 
+        }
+        return cpt >= 3;
+    }
+    
+    private bool CheckForV(int x, int y)
+    {
+        TileState tileStateCurrently = mapArray[x, y];
+        if (y < 3) return false;
+        for (var i = y; i > y-3; i--)
+        {
+            if (i < 0 )return false;
+            if (mapArray[x, y-i] != tileStateCurrently) return false;
+        }
+        return true;
     }
 }

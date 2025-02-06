@@ -12,7 +12,7 @@ public abstract class EntityController : MonoBehaviour
         if (!Input.GetMouseButtonDown(0)) return;
         Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         var cursorPosInt = new Vector2(Mathf.Round(cursorPos.x),Mathf.Round(cursorPos.y));
-        if (cursorPosInt.x > MapManager.instance.x || cursorPosInt.y > MapManager.instance.y || cursorPosInt.x < 0 || cursorPosInt.y < 0)return;
+        if (cursorPosInt.x > MapManager.instance.w || cursorPosInt.y > MapManager.instance.h || cursorPosInt.x < 0 || cursorPosInt.y < 0)return;
         var y = CheckForCollone(cursorPosInt);
         var spriteRenderer = MapManager.instance.mapArrayInGame[(int)cursorPosInt.x,y].gameObject
             .GetComponent<SpriteRenderer>();
@@ -31,7 +31,7 @@ public abstract class EntityController : MonoBehaviour
                 StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.Ia));
                 break;
         }
-        
+        MapManager.instance.CheckForWin((int)cursorPosInt.x, y,turn);
     }
 
     IEnumerator SwitchTurnAndWait(float time,GameManager.GameTurn turn)

@@ -15,6 +15,7 @@ public class PlayerController : EntityController
         if (GameManager.instance.currentPlayer == GameManager.GameTurn.Player)
         {
             base.PlaceJeton(turn);
+            GameManager.instance.UpdateTurnText();
         }
     }
 }
