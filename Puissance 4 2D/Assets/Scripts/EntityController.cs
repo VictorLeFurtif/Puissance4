@@ -8,9 +8,11 @@ public abstract class EntityController : MonoBehaviour
     
     protected virtual void PlaceJeton(GameManager.GameTurn turn)
     {
+        if (turn == GameManager.GameTurn.Wait)return;
         if (!Input.GetMouseButtonDown(0)) return;
         Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         var cursorPosInt = new Vector2(Mathf.Round(cursorPos.x),Mathf.Round(cursorPos.y));
+        if (cursorPosInt.x > MapManager.instance.x || cursorPosInt.y > MapManager.instance.y || cursorPosInt.x < 0 || cursorPosInt.y < 0)return;
         var y = CheckForCollone(cursorPosInt);
         var spriteRenderer = MapManager.instance.mapArrayInGame[(int)cursorPosInt.x,y].gameObject
             .GetComponent<SpriteRenderer>();
@@ -19,17 +21,24 @@ public abstract class EntityController : MonoBehaviour
             case GameManager.GameTurn.Ia :
                 spriteRenderer.color = Color.yellow;
                 MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Yellow;
-                FinishTurn(GameManager.GameTurn.Player);
+                FinishTurn(GameManager.GameTurn.Wait);
+                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.Player));
                 break;
             case GameManager.GameTurn.Player :
                 spriteRenderer.color = Color.red;
                 MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Red;
-                FinishTurn(GameManager.GameTurn.Ia);
+                FinishTurn(GameManager.GameTurn.Wait);
+                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.Ia));
                 break;
         }
         
     }
 
+    IEnumerator SwitchTurnAndWait(float time,GameManager.GameTurn turn)
+    {
+        yield return new WaitForSeconds(time);
+        FinishTurn(turn);
+    }
     
     protected virtual void FinishTurn(GameManager.GameTurn switchPlayer)
     {

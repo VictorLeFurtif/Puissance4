@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,6 +23,13 @@ public class GameManager : MonoBehaviour
     public enum GameTurn
     {
         Player,
-        Ia
+        Ia,
+        Wait,
+    }
+
+    public void ReloadActualScene()
+    {
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        SceneManager.LoadScene(currentSceneName);
     }
 }
