@@ -97,25 +97,21 @@ public class MapManager : MonoBehaviour
     {
         var tileStateCurrently = mapArray[x, y];
         int cpt = 1;
-        for (var i = x; i < x+3; i++)
+        for (int i = 1; i < 4; i++)
         {
-            Debug.Log(cpt);
-            if (i < 0) return false;
-            if (x + i > w) break;
-            if (mapArray[x + i, y] != tileStateCurrently) return false;
+            int newX = x + i;
+            if (newX >= w || mapArray[newX,y] != tileStateCurrently)break;
             cpt++;
         }
-
-        for (int i = x; i > x - (3 - cpt); i--)
+        for (int i = 1; i < 4; i++)
         {
-            Debug.Log(cpt);
-            if (i < 0) return false;
-            if (x - i < 0) break;
-            if (mapArray[x - i, y] != tileStateCurrently) return false;
-            cpt++; 
+            int newX = x - i;
+            if (newX < 0 || mapArray[newX,y] != tileStateCurrently)break;
+            cpt++;
         }
-        return cpt >= 3;
+        return cpt >= 4;
     }
+
     
     private bool CheckForV(int x, int y)
     {
