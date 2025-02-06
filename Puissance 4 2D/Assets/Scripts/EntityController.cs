@@ -3,29 +3,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerControler : MonoBehaviour
+public abstract class EntityController : MonoBehaviour
 {
-  
-
-    private void Update()
+    
+    protected virtual void PlaceJeton(GameManager.GameTurn turn)
     {
-        placeJeton();
-    }
-
-    private void placeJeton()
-    {
-        if (GameManager.instance.currentPlayer != GameManager.GameTurn.Player) return;
         if (!Input.GetMouseButtonDown(0)) return;
         Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        var cursorPosInt = new Vector2((int)cursorPos.x, (int)cursorPos.y);
+        var cursorPosInt = new Vector2(Mathf.Round(cursorPos.x),Mathf.Round(cursorPos.y));
         var y = CheckForCollone(cursorPosInt);
         var spriteRenderer = MapManager.instance.mapArrayInGame[(int)cursorPosInt.x,y].gameObject
             .GetComponent<SpriteRenderer>();
-        spriteRenderer.color = Color.red;
-        MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Red;
-
+        switch (turn)
+        {
+            case GameManager.GameTurn.Ia :
+                spriteRenderer.color = Color.yellow;
+                MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Yellow;
+                FinishTurn(GameManager.GameTurn.Player);
+                break;
+            case GameManager.GameTurn.Player :
+                spriteRenderer.color = Color.red;
+                MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Red;
+                FinishTurn(GameManager.GameTurn.Ia);
+                break;
+        }
+        
     }
 
+    
+    protected virtual void FinishTurn(GameManager.GameTurn switchPlayer)
+    {
+        GameManager.instance.currentPlayer = switchPlayer;
+    }
+    
     private int CheckForCollone(Vector2 objectPlace)
     {
         if (objectPlace.y == 0 && MapManager.instance.mapArray[(int)objectPlace.x,(int)objectPlace.y] 
