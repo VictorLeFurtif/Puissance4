@@ -20,11 +20,15 @@ public class IAController : EntityController
         {
             if (GameManager.instance.currentPlayer != myType) return;
             if (turn == GameManager.GameTurn.Wait)return;
-            MapManager.TileState[,] copyArray = new MapManager.TileState[MapManager.instance.w,MapManager.instance.h];
-            System.Array.Copy(MapManager.instance.mapArray, copyArray,MapManager.instance.mapArray.Length );
+            MapManager.TileState[,] copyArray = DeepCopyArray(MapManager.instance.mapArray);
             float maxValue = 0;
             for (var i = 0; i < MapManager.instance.w; i++)
             {
+                if (IsColumnFull(i))
+                {
+                    continue;
+                }
+                
                 var y = CheckForCollone(new Vector2(i, 3));
                 if (EvaluationForActualPlayer(i,y,copyArray) > maxValue)
                 {
@@ -50,8 +54,27 @@ public class IAController : EntityController
     {
         
     }*/
-    
-    
+   private MapManager.TileState[,] DeepCopyArray(MapManager.TileState[,] original)
+   {
+       int width = MapManager.instance.w;
+       int height = MapManager.instance.h;
+       MapManager.TileState[,] newArray = new MapManager.TileState[width, height];
+
+       for (int x = 0; x < width; x++)
+       {
+           for (int y = 0; y < height; y++)
+           {
+               newArray[x, y] = original[x, y];
+           }
+       }
+       return newArray;
+   }
+
+   private bool IsColumnFull(int x)
+   {
+       return MapManager.instance.mapArray[x, MapManager.instance.h - 1] != MapManager.TileState.Empty;
+   }
+
     private float EvaluationForActualPlayer(int x, int y,MapManager.TileState[,]copyArray)
     {
         float cpt = CheckForVN(x, y, copyArray) + CheckForHN(x,y,copyArray) + 
