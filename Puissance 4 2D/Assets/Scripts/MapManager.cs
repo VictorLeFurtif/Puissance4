@@ -21,7 +21,8 @@ public class MapManager : MonoBehaviour
     [SerializeField] private float scalePlaceHolderY;
     [SerializeField] private float placeHolderPositionX;
     [SerializeField] private float placeHolderPositionY;
-
+    [SerializeField] private int compteurBeforeNul = 0;
+    
     public enum TileState
     {
         Yellow,
@@ -83,16 +84,61 @@ public class MapManager : MonoBehaviour
         return mapArrayInGame;
     }
 
-    public void CheckForWin(int x, int y,GameManager.GameTurn turn)
+    public void CheckForWinOrNull(int x, int y,GameManager.GameTurn turn)
     {
-        if (CheckForV(x,y) || CheckForH(x,y))
+        if (CheckForV(x,y) || CheckForH(x,y) || CheckForD(x,y))
         {
             Debug.Log(turn + " Win");
         }
 
-        
+        if (CheckForNul())
+        {
+            Debug.Log("Match Nul");
+        }
     }
 
+    private bool CheckForNul()
+    {
+        compteurBeforeNul++;
+        Debug.Log(compteurBeforeNul);
+        return compteurBeforeNul > 42;
+    }
+    
+    private bool CheckForD(int x, int y)
+    {
+        var tileStateCurrently = mapArray[x, y];
+        int cpt = 1;
+        for (int i = 1; i < 4; i++)
+        {
+            int newX = x + i;
+            int newY = y + i;
+            if (newX >= w || newY >= h || mapArray[newX,newY] != tileStateCurrently )break;
+            cpt++;
+        }
+        for (int i = 1; i < 4; i++)
+        {
+            int newX = x - i;
+            int newY = y - i;
+            if ( newX < 0 || newY < 0 || mapArray[newX,newY] != tileStateCurrently)break;
+            cpt++;
+        }
+        for (int i = 1; i < 4; i++)
+        {
+            int newX = x - i;
+            int newY = y + i;
+            if (newX < 0 || newY >= h || mapArray[newX,newY] != tileStateCurrently )break;
+            cpt++;
+        }
+        for (int i = 1; i < 4; i++)
+        {
+            int newX = x + i;
+            int newY = y - i;
+            if ( newX >= w || newY < 0 || mapArray[newX,newY] != tileStateCurrently )break;
+            cpt++;
+        }
+        return cpt >= 4;
+    }
+    
     private bool CheckForH(int x, int y)
     {
         var tileStateCurrently = mapArray[x, y];

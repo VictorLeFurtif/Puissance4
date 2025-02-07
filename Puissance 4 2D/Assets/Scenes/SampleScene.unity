@@ -198,13 +198,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   firstTile: {fileID: 6935483611874951892, guid: 4fd33e3ec9108fa489cfaea3dbf89593, type: 3}
   secondTile: {fileID: 4275406192300461765, guid: 39ebf748b5d5cc54b83f7f42e679b0e9, type: 3}
-  x: 7
-  y: 6
+  w: 7
+  h: 6
   placeHolder: {fileID: 1793077371}
   scalePlaceHolderX: 0.6
   scalePlaceHolderY: 0.6
   placeHolderPositionX: 3.04
   placeHolderPositionY: 2.51
+  compteurBeforeNul: 0
 --- !u!4 &217345594
 Transform:
   m_ObjectHideFlags: 0

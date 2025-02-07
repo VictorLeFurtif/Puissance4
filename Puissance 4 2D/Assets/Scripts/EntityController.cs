@@ -31,7 +31,8 @@ public abstract class EntityController : MonoBehaviour
                 StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.Ia));
                 break;
         }
-        MapManager.instance.CheckForWin((int)cursorPosInt.x, y,turn);
+        
+        MapManager.instance.CheckForWinOrNull((int)cursorPosInt.x, y,turn);
     }
 
     IEnumerator SwitchTurnAndWait(float time,GameManager.GameTurn turn)
