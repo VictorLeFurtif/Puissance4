@@ -363,7 +363,7 @@ MonoBehaviour:
   player: {fileID: 553126744503814016, guid: 144cb8e63d7cb7343a681d5a784ad3f5, type: 3}
   secondPlayer: {fileID: 337200845397918201, guid: 08b306c8574df8340a9c5a0d6604b7e7, type: 3}
   iaRandom: {fileID: 30816721764615008, guid: f1a6bddafeaf65145b1f1a4cee4a91fa, type: 3}
-  iaCool: {fileID: 0}
+  iaCool: {fileID: 4755330774859580214, guid: db239b58e13bdc94ba74d96947ad385e, type: 3}
 --- !u!1 &499529238
 GameObject:
   m_ObjectHideFlags: 0

@@ -14,23 +14,31 @@ public class IAController : EntityController
 
     protected override void PlaceJeton(GameManager.GameTurn turn)
     {
-        if (GameManager.instance.currentPlayer != myType) return;
-        if (turn == GameManager.GameTurn.Wait)return;
-        MapManager.TileState[,] copyArray = new MapManager.TileState[MapManager.instance.w,MapManager.instance.h];
-        System.Array.Copy(MapManager.instance.mapArray, copyArray,MapManager.instance.mapArray.Length );
-        float maxValue = 0;
-        int newX = 0;
-        int newY = 0;
-        for (var i = 0; i < MapManager.instance.w; i++)
+        int newX=0;
+        int newY=0;
+        while (true)
         {
-            var y = CheckForCollone(new Vector2(i, 3));
-            if (Evaluation(i,y,copyArray) > maxValue)
+            if (GameManager.instance.currentPlayer != myType) return;
+            if (turn == GameManager.GameTurn.Wait)return;
+            MapManager.TileState[,] copyArray = new MapManager.TileState[MapManager.instance.w,MapManager.instance.h];
+            System.Array.Copy(MapManager.instance.mapArray, copyArray,MapManager.instance.mapArray.Length );
+            float maxValue = 0;
+            for (var i = 0; i < MapManager.instance.w; i++)
             {
-                maxValue = Evaluation(i, y,copyArray);
-                newY = y;
-                newX = i;
+                var y = CheckForCollone(new Vector2(i, 3));
+                if (EvaluationForActualPlayer(i,y,copyArray) > maxValue)
+                {
+                    maxValue = EvaluationForActualPlayer(i, y,copyArray);
+                    newY = y;
+                    newX = i;
+                }
+            }
+            if (newY <= MapManager.instance.h)
+            {
+                break;
             }
         }
+       
         var spriteRenderer = MapManager.instance.mapArrayInGame[newX,newY].gameObject
             .GetComponent<SpriteRenderer>();
         SwitchForColor(turn, spriteRenderer, newX,newY);
@@ -38,7 +46,13 @@ public class IAController : EntityController
         GameManager.instance.UpdateTurnText();
     }
 
-    private float Evaluation(int x, int y,MapManager.TileState[,]copyArray)
+   /* private float EvaluationToCheckForEnnemy()
+    {
+        
+    }*/
+    
+    
+    private float EvaluationForActualPlayer(int x, int y,MapManager.TileState[,]copyArray)
     {
         float cpt = CheckForVN(x, y, copyArray) + CheckForHN(x,y,copyArray) + 
                     CheckForDRN(x,y,copyArray) + CheckForDLN(x,y,copyArray); //condition line
