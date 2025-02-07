@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] private GameObject secondPlayer;
     [SerializeField] private GameObject iaRandom;
+    [SerializeField] private GameObject iaCool;
     
     private void Awake()
     {
@@ -55,5 +56,11 @@ public class GameManager : MonoBehaviour
     {
         Instantiate(player);
         Instantiate(iaRandom);
+    }
+    
+    public void GameWithIaCool()
+    {
+        Instantiate(player);
+        Instantiate(iaCool);
     }
 }

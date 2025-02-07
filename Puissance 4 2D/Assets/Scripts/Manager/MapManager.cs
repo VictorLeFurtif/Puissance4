@@ -84,21 +84,26 @@ public class MapManager : MonoBehaviour
         return mapArrayInGame;
     }
 
-    public void CheckForWinOrNull(int x, int y,GameManager.GameTurn turn)
+    public bool CheckForWinOrNull(int x, int y,GameManager.GameTurn turn)
     {
         if (CheckForV(x,y) || CheckForH(x,y) || CheckForDRight(x,y) || CheckForDLeft(x,y))
         {
             Debug.Log(turn + " Win");
+            return true;
         }
 
         if (CheckForNul())
         {
             Debug.Log("Match Nul");
+            return true;
         }
+
+        return false;
     }
 
     private bool CheckForNul()
     {
+        print(compteurBeforeNul);
         compteurBeforeNul++;
         return compteurBeforeNul > 42;
     }
