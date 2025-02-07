@@ -86,7 +86,7 @@ public class MapManager : MonoBehaviour
 
     public void CheckForWinOrNull(int x, int y,GameManager.GameTurn turn)
     {
-        if (CheckForV(x,y) || CheckForH(x,y) || CheckForD(x,y))
+        if (CheckForV(x,y) || CheckForH(x,y) || CheckForDRight(x,y) || CheckForDLeft(x,y))
         {
             Debug.Log(turn + " Win");
         }
@@ -100,11 +100,10 @@ public class MapManager : MonoBehaviour
     private bool CheckForNul()
     {
         compteurBeforeNul++;
-        Debug.Log(compteurBeforeNul);
         return compteurBeforeNul > 42;
     }
     
-    private bool CheckForD(int x, int y)
+    private bool CheckForDRight(int x, int y)
     {
         var tileStateCurrently = mapArray[x, y];
         int cpt = 1;
@@ -122,6 +121,14 @@ public class MapManager : MonoBehaviour
             if ( newX < 0 || newY < 0 || mapArray[newX,newY] != tileStateCurrently)break;
             cpt++;
         }
+        
+        return cpt >= 4;
+    }
+
+    private bool CheckForDLeft(int x, int y)
+    {
+        var tileStateCurrently = mapArray[x, y];
+        int cpt = 1;
         for (int i = 1; i < 4; i++)
         {
             int newX = x - i;
