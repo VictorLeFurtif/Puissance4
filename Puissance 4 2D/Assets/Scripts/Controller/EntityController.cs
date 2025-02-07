@@ -7,8 +7,26 @@ public abstract class EntityController : MonoBehaviour
 {
     
     protected abstract void PlaceJeton(GameManager.GameTurn turn);
-    
 
+    protected void SwitchForColor(GameManager.GameTurn turn, SpriteRenderer spriteRenderer, int newX, int newY)
+    {
+        switch (turn)
+        {
+            case GameManager.GameTurn.IaOrSecondPLayer :
+                spriteRenderer.color = Color.yellow;
+                MapManager.instance.mapArray[newX,newY] = MapManager.TileState.Yellow;
+                FinishTurn(GameManager.GameTurn.Wait);
+                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.You));
+                break;
+            case GameManager.GameTurn.You :
+                spriteRenderer.color = Color.red;
+                MapManager.instance.mapArray[newX,newY] = MapManager.TileState.Red;
+                FinishTurn(GameManager.GameTurn.Wait);
+                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.IaOrSecondPLayer));
+                break;
+        }
+    }
+    
     protected IEnumerator SwitchTurnAndWait(float time,GameManager.GameTurn turn)
     {
         yield return new WaitForSeconds(time);

@@ -23,22 +23,7 @@ public class PlayerController : EntityController
         var y = CheckForCollone(cursorPosInt);
         var spriteRenderer = MapManager.instance.mapArrayInGame[(int)cursorPosInt.x,y].gameObject
             .GetComponent<SpriteRenderer>();
-        switch (turn)
-        {
-            case GameManager.GameTurn.IaOrSecondPLayer :
-                spriteRenderer.color = Color.yellow;
-                MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Yellow;
-                FinishTurn(GameManager.GameTurn.Wait);
-                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.You));
-                break;
-            case GameManager.GameTurn.You :
-                spriteRenderer.color = Color.red;
-                MapManager.instance.mapArray[(int)cursorPosInt.x, y] = MapManager.TileState.Red;
-                FinishTurn(GameManager.GameTurn.Wait);
-                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.IaOrSecondPLayer));
-                break;
-        }
-        
+        SwitchForColor(turn, spriteRenderer, (int)cursorPosInt.x,y);
         MapManager.instance.CheckForWinOrNull((int)cursorPosInt.x, y,turn);
         GameManager.instance.UpdateTurnText();
     }
