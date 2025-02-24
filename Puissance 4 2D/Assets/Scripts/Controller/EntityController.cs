@@ -26,8 +26,8 @@ public abstract class EntityController : MonoBehaviour
                 break;
         }
     }
-    
-    protected IEnumerator SwitchTurnAndWait(float time,GameManager.GameTurn turn)
+
+    private IEnumerator SwitchTurnAndWait(float time,GameManager.GameTurn turn)
     {
         yield return new WaitForSeconds(time);
         FinishTurn(turn);
@@ -57,4 +57,5 @@ public abstract class EntityController : MonoBehaviour
 
         return 0;
     }
+    
 }

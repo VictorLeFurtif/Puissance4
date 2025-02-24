@@ -14,18 +14,20 @@ public class PlayerController : EntityController
 
     protected override void PlaceJeton(GameManager.GameTurn turn)
     {
-        if (GameManager.instance.currentPlayer != myType) return;
-        if (turn == GameManager.GameTurn.Wait)return;
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait || 
+            !Input.GetMouseButtonDown(0)) return;
         Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         var cursorPosInt = new Vector2(Mathf.Round(cursorPos.x),Mathf.Round(cursorPos.y));
+        Debug.Log(cursorPosInt);
         if (cursorPosInt.x > MapManager.instance.w || cursorPosInt.y > MapManager.instance.h || cursorPosInt.x < 0 || cursorPosInt.y < 0)return;
         var y = CheckForCollone(cursorPosInt);
         var spriteRenderer = MapManager.instance.mapArrayInGame[(int)cursorPosInt.x,y].gameObject
             .GetComponent<SpriteRenderer>();
         SwitchForColor(turn, spriteRenderer, (int)cursorPosInt.x,y);
-        MapManager.instance.CheckForWinOrNull((int)cursorPosInt.x, y,turn);
+        MapManager.instance.CheckForWin((int)cursorPosInt.x, y,turn);
+        MapManager.instance.CheckForNul();
         GameManager.instance.UpdateTurnText();
+        MapManager.instance.StackMap();
     }
     
 }

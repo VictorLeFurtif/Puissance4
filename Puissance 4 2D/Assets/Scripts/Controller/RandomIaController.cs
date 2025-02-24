@@ -35,10 +35,9 @@ public class RandomIaController : EntityController
         var spriteRenderer = MapManager.instance.mapArrayInGame[newX,newY].gameObject
             .GetComponent<SpriteRenderer>();
         SwitchForColor(turn, spriteRenderer, newX,newY);
-        MapManager.instance.CheckForWinOrNull(newX,newY,turn);
+        MapManager.instance.CheckForWin(newX,newY,turn);
+        MapManager.instance.CheckForNul();
         GameManager.instance.UpdateTurnText();
-        
+        MapManager.instance.StackMap();
     }
-
-    
 }

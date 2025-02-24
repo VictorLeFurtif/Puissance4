@@ -22,6 +22,10 @@ public class MapManager : MonoBehaviour
     [SerializeField] private float placeHolderPositionX;
     [SerializeField] private float placeHolderPositionY;
     [SerializeField] private int compteurBeforeNul = 0;
+
+    private Color defaultColor;
+
+    public Stack<TileState[,]> undoList = new Stack<TileState[,]>();
     
     public enum TileState
     {
@@ -47,6 +51,9 @@ public class MapManager : MonoBehaviour
         GenerateMapEnum();
         SetGrill();
         GenerateMapGameObjects();
+        StackMap();
+        defaultColor = mapArrayInGame[1, 1].gameObject.GetComponent<SpriteRenderer>().color;
+        RefreshMap();
     }
     
     private void SetGrill()
@@ -84,28 +91,23 @@ public class MapManager : MonoBehaviour
         return mapArrayInGame;
     }
 
-    public bool CheckForWinOrNull(int x, int y,GameManager.GameTurn turn)
+    public bool CheckForWin(int x, int y,GameManager.GameTurn turn)
     {
         if (CheckForV(x,y) || CheckForH(x,y) || CheckForDRight(x,y) || CheckForDLeft(x,y))
         {
             Debug.Log(turn + " Win");
             return true;
         }
-
-        if (CheckForNul())
-        {
-            Debug.Log("Match Nul");
-            return true;
-        }
-
         return false;
     }
 
-    private bool CheckForNul()
+    public void CheckForNul()
     {
-        print(compteurBeforeNul);
         compteurBeforeNul++;
-        return compteurBeforeNul > 42;
+        if (compteurBeforeNul > 42)
+        {
+            Debug.Log("Match Nul");
+        }
     }
     
     private bool CheckForDRight(int x, int y)
@@ -181,5 +183,40 @@ public class MapManager : MonoBehaviour
             if (mapArray[x, y-i] != tileStateCurrently) return false;
         }
         return true;
+    }
+    
+    public void StackMap()
+    {
+        //call it after each Turn
+        TileState[,] tileStatesToSecure = new TileState[7,6];
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                tileStatesToSecure[i, j] = mapArray[i, j];
+            }
+        }
+        undoList.Push(tileStatesToSecure);
+    }
+
+    public void RefreshMap()
+    {
+        for (int i = 0; i < 7; i++)
+        {
+            for (int j = 0; j < 6; j++)
+            {
+                switch (mapArray[i,j])
+                {
+                    case TileState.Empty : mapArrayInGame[i,j].gameObject.GetComponent<SpriteRenderer>().color = defaultColor;
+                        break;
+                    case TileState.Red : mapArrayInGame[i,j].gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+                        break;
+                    case TileState.Yellow : mapArrayInGame[i,j].gameObject.GetComponent<SpriteRenderer>().color = Color.yellow;
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
     }
 }

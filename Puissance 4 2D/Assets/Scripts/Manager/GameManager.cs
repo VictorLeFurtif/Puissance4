@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject secondPlayer;
     [SerializeField] private GameObject iaRandom;
     [SerializeField] private GameObject iaCool;
+    
     
     private void Awake()
     {
@@ -62,5 +64,15 @@ public class GameManager : MonoBehaviour
     {
         Instantiate(player);
         Instantiate(iaCool);
+    }
+
+    public void UndoTurn()
+    {
+        if (MapManager.instance.undoList.Count == 0) return;
+        
+        var indexToGet = MapManager.instance.undoList.Count;
+        MapManager.instance.mapArray = MapManager.instance.undoList.Peek();
+        MapManager.instance.undoList.Pop();
+        MapManager.instance.RefreshMap();
     }
 }

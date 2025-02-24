@@ -14,14 +14,15 @@ public class IAController : EntityController
 
     protected override void PlaceJeton(GameManager.GameTurn turn)
     {
+        if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait) return;
         int newX=0;
         int newY=0;
         while (true)
         {
-            if (GameManager.instance.currentPlayer != myType) return;
-            if (turn == GameManager.GameTurn.Wait)return;
+            
             MapManager.TileState[,] copyArray = DeepCopyArray(MapManager.instance.mapArray);
             float maxValue = 0;
+            
             for (var i = 0; i < MapManager.instance.w; i++)
             {
                 if (IsColumnFull(i))
@@ -30,8 +31,20 @@ public class IAController : EntityController
                 }
                 
                 var y = CheckForCollone(new Vector2(i, 3));
+              
+                var tokenStocking = MapManager.instance.mapArray[i, y]; 
+                MapManager.instance.mapArray[i,y] = MapManager.TileState.Yellow;
+              if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.You))
+                {
+                    newX = i;
+                    newY = y;
+                    break;
+                }
+                MapManager.instance.mapArray[i,y] = tokenStocking;  
+              
                 if (EvaluationForActualPlayer(i,y,copyArray) > maxValue)
                 {
+                    // evaluation réaliser avant l'assignation
                     maxValue = EvaluationForActualPlayer(i, y,copyArray);
                     newY = y;
                     newX = i;
@@ -46,14 +59,15 @@ public class IAController : EntityController
         var spriteRenderer = MapManager.instance.mapArrayInGame[newX,newY].gameObject
             .GetComponent<SpriteRenderer>();
         SwitchForColor(turn, spriteRenderer, newX,newY);
-        MapManager.instance.CheckForWinOrNull(newX,newY,turn);
-        GameManager.instance.UpdateTurnText();
-    }
 
-   /* private float EvaluationToCheckForEnnemy()
-    {
-        
-    }*/
+        Debug.Log("qjsldkjgqslkj check for win");
+        MapManager.instance.CheckForWin(newX,newY,turn);
+        MapManager.instance.CheckForNul();
+        GameManager.instance.UpdateTurnText();
+        MapManager.instance.StackMap();
+    }
+    
+    
    private MapManager.TileState[,] DeepCopyArray(MapManager.TileState[,] original)
    {
        int width = MapManager.instance.w;
@@ -79,10 +93,15 @@ public class IAController : EntityController
     {
         float cpt = CheckForVN(x, y, copyArray) + CheckForHN(x,y,copyArray) + 
                     CheckForDRN(x,y,copyArray) + CheckForDLN(x,y,copyArray); //condition line
-        if (MapManager.instance.CheckForWinOrNull(x,y,myType))
+        var tokenStocking = MapManager.instance.mapArray[x, y]; 
+        MapManager.instance.mapArray[x,y] = MapManager.TileState.Yellow;
+        
+        if (MapManager.instance.CheckForWin(x,y,myType)) //cela déconne ici
         {
             cpt += 1000;
         }
+        
+        MapManager.instance.mapArray[x,y] = tokenStocking;
         return cpt;
     }
 
