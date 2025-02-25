@@ -6,18 +6,95 @@ using UnityEngine;
 public class IAController : EntityController
 {
     [SerializeField] private GameManager.GameTurn myType;
+    private int profondeur = 0;
+    [SerializeField] private int profondeurMax;
 
     private void Update()
     {
         PlaceJeton(myType);
     }
 
+    private void MiniMax(int profondeurMax,bool iaTurn,GameManager.GameTurn turn)
+    {
+        if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait) return;
+
+        if (profondeur == profondeurMax)
+        {
+            return; //TODO : PlaceJeton à cette endroit
+        }
+        
+        int newX=0;
+        int newY=0;
+        
+        MapManager.instance.StackMap();
+        
+        //dc ia Turn
+        if (iaTurn)
+        {
+            while (true)
+            {
+                MapManager.TileState[,] copyArray = DeepCopyArray(MapManager.instance.mapArray); //TODO: ne pas oublier de redonner ce deepCopy à la fin
+                float maxValue = float.NegativeInfinity;
+            
+                for (var i = 0; i < MapManager.instance.w; i++)
+                {
+                    if (IsColumnFull(i))
+                    {
+                        continue;
+                    }
+                    var y = CheckForCollone(new Vector2(i, 3));
+
+                    if (!(EvaluationForActualPlayer(i, y, copyArray) > maxValue)) continue;
+                    maxValue = EvaluationForActualPlayer(i, y,copyArray);
+                    newY = y;
+                    newX = i;
+                }
+                if (newY <= MapManager.instance.h)
+                {
+                    break;
+                }
+            }
+            profondeur++;
+            MiniMax(profondeurMax,false,turn);
+        }
+        //dc Player Turn
+        else
+        {
+            while (true)
+            {
+                MapManager.TileState[,] copyArray = DeepCopyArray(MapManager.instance.mapArray); //TODO: ne pas oublier de redonner ce deepCopy à la fin
+                float minValue = float.PositiveInfinity;
+            
+                for (var i = 0; i < MapManager.instance.w; i++)
+                {
+                    if (IsColumnFull(i))
+                    {
+                        continue;
+                    }
+                    var y = CheckForCollone(new Vector2(i, 3));
+
+                    if (!(-EvaluationForActualPlayer(i, y, copyArray) < minValue)) continue;
+                    minValue = -EvaluationForActualPlayer(i, y,copyArray);
+                    newY = y;
+                    newX = i;
+                }
+                if (newY <= MapManager.instance.h)
+                {
+                    break;
+                }
+            }
+            profondeur++;
+            MiniMax(profondeurMax,true,turn);
+        }
+    }
+
+    
     protected override void PlaceJeton(GameManager.GameTurn turn)
     {
         if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait) return;
         int newX=0;
         int newY=0;
-        MapManager.instance.StackMap();
+        MapManager.instance.StackMap(); 
         while (true)
         {
             
@@ -33,7 +110,7 @@ public class IAController : EntityController
                 
                 var y = CheckForCollone(new Vector2(i, 3));
               
-                
+                /*
                 var tokenStocking = MapManager.instance.mapArray[i, y]; 
                 MapManager.instance.mapArray[i,y] = MapManager.TileState.Yellow;
                 if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.Ia,true)) 
@@ -44,6 +121,7 @@ public class IAController : EntityController
                     break;
                 }
                 MapManager.instance.mapArray[i,y] = tokenStocking; 
+              */
               
                 if (EvaluationForActualPlayer(i,y,copyArray) > maxValue)
                 {
@@ -55,7 +133,7 @@ public class IAController : EntityController
                 
                 //
                 
-                tokenStocking = MapManager.instance.mapArray[i, y]; 
+                /*tokenStocking = MapManager.instance.mapArray[i, y]; 
                 MapManager.instance.mapArray[i,y] = MapManager.TileState.Red;
                 if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.You,false)) // Le problem il est la je pense
                 {
@@ -64,7 +142,7 @@ public class IAController : EntityController
                     MapManager.instance.mapArray[i,y] = tokenStocking; 
                     break;
                 }
-                MapManager.instance.mapArray[i,y] = tokenStocking;  
+                MapManager.instance.mapArray[i,y] = tokenStocking;  */
                 
             }
             if (newY <= MapManager.instance.h)
@@ -72,15 +150,18 @@ public class IAController : EntityController
                 break;
             }
         }
-       
-        var spriteRenderer = MapManager.instance.mapArrayInGame[newX,newY].gameObject
+        PlaceJetonAt(newX,newY,turn);
+    }
+
+    private void PlaceJetonAt(int x, int y,GameManager.GameTurn turn)
+    {
+        var spriteRenderer = MapManager.instance.mapArrayInGame[x,y].gameObject
             .GetComponent<SpriteRenderer>();
-        SwitchForColor(turn, spriteRenderer, newX,newY);
+        SwitchForColor(turn, spriteRenderer, x,y);
         
-        MapManager.instance.CheckForWin(newX,newY,turn,true);
+        MapManager.instance.CheckForWin(x,y,turn,true);
         MapManager.instance.CheckForNul();
         GameManager.instance.UpdateTurnText();
-        
     }
     
     
@@ -109,6 +190,25 @@ public class IAController : EntityController
     {
         float cpt = CheckForVN(x, y, copyArray) + CheckForHN(x,y,copyArray) + 
                     CheckForDRN(x,y,copyArray) + CheckForDLN(x,y,copyArray); //condition line
+        
+        //for ia check fatal win coup
+        var tokenStocking = MapManager.instance.mapArray[x, y]; 
+        MapManager.instance.mapArray[x,y] = MapManager.TileState.Yellow;
+        if (MapManager.instance.CheckForWin(x,y,GameManager.GameTurn.Ia,true))
+        {
+            cpt += 1000;
+        }
+        MapManager.instance.mapArray[x,y] = tokenStocking; 
+        
+        //Check to block player
+        tokenStocking = MapManager.instance.mapArray[x, y]; 
+        MapManager.instance.mapArray[x,y] = MapManager.TileState.Red;
+        if (MapManager.instance.CheckForWin(x,y,GameManager.GameTurn.You,false)) 
+        {
+            cpt += 1000;
+        }
+        MapManager.instance.mapArray[x,y] = tokenStocking;
+        
         return cpt;
     }
     
