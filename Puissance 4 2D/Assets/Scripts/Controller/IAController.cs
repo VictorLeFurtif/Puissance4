@@ -6,7 +6,6 @@ using UnityEngine;
 public class IAController : EntityController
 {
     [SerializeField] private GameManager.GameTurn myType;
-    private int profondeur = 0;
     [SerializeField] private int profondeurMax;
 
     private void Update()
@@ -14,81 +13,78 @@ public class IAController : EntityController
         PlaceJeton(myType);
     }
 
-    private void MiniMax(int profondeurMax,bool iaTurn,GameManager.GameTurn turn)
+    private float MiniMax(MapManager.TileState[,] board, int profondeur, bool iaTurn)
+    {
+        
+        if (profondeur == profondeurMax) //TODO: check for end game
+        {
+            return EvalBoard(board, iaTurn);  
+        }
+
+        float bestScore = iaTurn ? int.MinValue : int.MaxValue;
+        int bestColumn = -1;
+
+        for (int i = 0; i < MapManager.instance.w; i++)
+        {
+            if (IsColumnFull(i)) continue;
+
+            int y = CheckForCollone(new Vector2(i, 3));
+            var boardCopy = DeepCopyArray(board);
+            
+            boardCopy[i, y] = iaTurn ? MapManager.TileState.Yellow : MapManager.TileState.Red;
+
+            float eval = MiniMax(boardCopy, profondeur + 1, !iaTurn);
+
+            
+            if ((iaTurn && eval > bestScore) || (!iaTurn && eval < bestScore))
+            {
+                bestScore = eval;
+                bestColumn = i;
+            }
+        }
+
+        return profondeur == 0 ? bestColumn : bestScore; 
+    }
+
+
+    private float EvalBoard(MapManager.TileState[,] board, bool iaTurn)
+    {
+        float totalScore = 0;
+
+        for (int x = 0; x < MapManager.instance.w; x++)
+        {
+            for (int y = 0; y < MapManager.instance.h; y++)
+            {
+                switch (board[x, y])
+                {
+                    case MapManager.TileState.Yellow:
+                        totalScore += EvaluationForActualPlayer(x, y, board);
+                        break;
+                    case MapManager.TileState.Red:
+                        totalScore -= EvaluationForActualPlayer(x, y, board);
+                        break;
+                }
+            }
+        }
+        return iaTurn ? totalScore : -totalScore; 
+    }
+
+    protected override void PlaceJeton(GameManager.GameTurn turn)
     {
         if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait) return;
 
-        if (profondeur == profondeurMax)
-        {
-            return; //TODO : PlaceJeton à cette endroit
-        }
-        
-        int newX=0;
-        int newY=0;
-        
         MapManager.instance.StackMap();
-        
-        //dc ia Turn
-        if (iaTurn)
-        {
-            while (true)
-            {
-                MapManager.TileState[,] copyArray = DeepCopyArray(MapManager.instance.mapArray); //TODO: ne pas oublier de redonner ce deepCopy à la fin
-                float maxValue = float.NegativeInfinity;
-            
-                for (var i = 0; i < MapManager.instance.w; i++)
-                {
-                    if (IsColumnFull(i))
-                    {
-                        continue;
-                    }
-                    var y = CheckForCollone(new Vector2(i, 3));
 
-                    if (!(EvaluationForActualPlayer(i, y, copyArray) > maxValue)) continue;
-                    maxValue = EvaluationForActualPlayer(i, y,copyArray);
-                    newY = y;
-                    newX = i;
-                }
-                if (newY <= MapManager.instance.h)
-                {
-                    break;
-                }
-            }
-            profondeur++;
-            MiniMax(profondeurMax,false,turn);
-        }
-        //dc Player Turn
-        else
-        {
-            while (true)
-            {
-                MapManager.TileState[,] copyArray = DeepCopyArray(MapManager.instance.mapArray); //TODO: ne pas oublier de redonner ce deepCopy à la fin
-                float minValue = float.PositiveInfinity;
-            
-                for (var i = 0; i < MapManager.instance.w; i++)
-                {
-                    if (IsColumnFull(i))
-                    {
-                        continue;
-                    }
-                    var y = CheckForCollone(new Vector2(i, 3));
+        // Trouver le meilleur coup avec MiniMax
+        int bestMove = (int)MiniMax(MapManager.instance.mapArray, 0, true);
 
-                    if (!(-EvaluationForActualPlayer(i, y, copyArray) < minValue)) continue;
-                    minValue = -EvaluationForActualPlayer(i, y,copyArray);
-                    newY = y;
-                    newX = i;
-                }
-                if (newY <= MapManager.instance.h)
-                {
-                    break;
-                }
-            }
-            profondeur++;
-            MiniMax(profondeurMax,true,turn);
-        }
+        if (bestMove == -1) return;
+        int newY = CheckForCollone(new Vector2(bestMove, 3));
+        PlaceJetonAt(bestMove, newY, turn);
     }
 
     
+    /*
     protected override void PlaceJeton(GameManager.GameTurn turn)
     {
         if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait) return;
@@ -110,7 +106,7 @@ public class IAController : EntityController
                 
                 var y = CheckForCollone(new Vector2(i, 3));
               
-                /*
+                
                 var tokenStocking = MapManager.instance.mapArray[i, y]; 
                 MapManager.instance.mapArray[i,y] = MapManager.TileState.Yellow;
                 if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.Ia,true)) 
@@ -121,7 +117,7 @@ public class IAController : EntityController
                     break;
                 }
                 MapManager.instance.mapArray[i,y] = tokenStocking; 
-              */
+              
               
                 if (EvaluationForActualPlayer(i,y,copyArray) > maxValue)
                 {
@@ -131,9 +127,9 @@ public class IAController : EntityController
                     newX = i;
                 }
                 
-                //
                 
-                /*tokenStocking = MapManager.instance.mapArray[i, y]; 
+                
+                tokenStocking = MapManager.instance.mapArray[i, y]; 
                 MapManager.instance.mapArray[i,y] = MapManager.TileState.Red;
                 if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.You,false)) // Le problem il est la je pense
                 {
@@ -142,7 +138,7 @@ public class IAController : EntityController
                     MapManager.instance.mapArray[i,y] = tokenStocking; 
                     break;
                 }
-                MapManager.instance.mapArray[i,y] = tokenStocking;  */
+                MapManager.instance.mapArray[i,y] = tokenStocking;  
                 
             }
             if (newY <= MapManager.instance.h)
@@ -151,7 +147,7 @@ public class IAController : EntityController
             }
         }
         PlaceJetonAt(newX,newY,turn);
-    }
+    }*/
 
     private void PlaceJetonAt(int x, int y,GameManager.GameTurn turn)
     {
