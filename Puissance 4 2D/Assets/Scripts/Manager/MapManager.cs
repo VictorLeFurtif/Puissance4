@@ -26,6 +26,7 @@ public class MapManager : MonoBehaviour
     private Color defaultColor;
 
     public Stack<TileState[,]> undoList = new Stack<TileState[,]>();
+    public Stack<TileState[,]> redoList = new Stack<TileState[,]>();
     
     public enum TileState
     {
@@ -91,11 +92,15 @@ public class MapManager : MonoBehaviour
         return mapArrayInGame;
     }
 
-    public bool CheckForWin(int x, int y,GameManager.GameTurn turn)
+    public bool CheckForWin(int x, int y,GameManager.GameTurn turn,bool realCheck)
     {
         if (CheckForV(x,y) || CheckForH(x,y) || CheckForDRight(x,y) || CheckForDLeft(x,y))
         {
-            Debug.Log(turn + " Win");
+            if (realCheck) // Check pour vérifier si c'est l'ia qui test ou pas.
+            {
+                Debug.Log(turn + " Win");
+            }
+            
             return true;
         }
         return false;
@@ -113,6 +118,9 @@ public class MapManager : MonoBehaviour
     private bool CheckForDRight(int x, int y)
     {
         var tileStateCurrently = mapArray[x, y];
+        
+        if (tileStateCurrently == TileState.Empty) return false;
+        
         int cpt = 1;
         for (int i = 1; i < 4; i++)
         {
@@ -134,7 +142,11 @@ public class MapManager : MonoBehaviour
 
     private bool CheckForDLeft(int x, int y)
     {
+        
         var tileStateCurrently = mapArray[x, y];
+        
+        if (tileStateCurrently == TileState.Empty) return false;
+        
         int cpt = 1;
         for (int i = 1; i < 4; i++)
         {
@@ -176,14 +188,20 @@ public class MapManager : MonoBehaviour
     private bool CheckForV(int x, int y)
     {
         TileState tileStateCurrently = mapArray[x, y];
-        if (y < 3) return false;
-        for (var i = y; i > y-3; i--)
+        if (tileStateCurrently == TileState.Empty) return false; 
+
+        int cpt = 1; 
+        
+        for (int i = 1; i < 4; i++)
         {
-            if (i < 0 )return false;
-            if (mapArray[x, y-i] != tileStateCurrently) return false;
+            int newY = y - i;
+            if (newY < 0 || mapArray[x, newY] != tileStateCurrently) break;
+            cpt++;
         }
-        return true;
+    
+        return cpt >= 4;
     }
+
     
     public void StackMap()
     {

@@ -12,7 +12,7 @@ public abstract class EntityController : MonoBehaviour
     {
         switch (turn)
         {
-            case GameManager.GameTurn.IaOrSecondPLayer :
+            case GameManager.GameTurn.Ia :
                 spriteRenderer.color = Color.yellow;
                 MapManager.instance.mapArray[newX,newY] = MapManager.TileState.Yellow;
                 FinishTurn(GameManager.GameTurn.Wait);
@@ -22,7 +22,7 @@ public abstract class EntityController : MonoBehaviour
                 spriteRenderer.color = Color.red;
                 MapManager.instance.mapArray[newX,newY] = MapManager.TileState.Red;
                 FinishTurn(GameManager.GameTurn.Wait);
-                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.IaOrSecondPLayer));
+                StartCoroutine(SwitchTurnAndWait(0.1f, GameManager.GameTurn.Ia));
                 break;
         }
     }

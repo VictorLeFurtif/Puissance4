@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour
     public enum GameTurn
     {
         You,
-        IaOrSecondPLayer,
+        Ia,
         Wait,
         Finished,
     }
@@ -66,13 +66,32 @@ public class GameManager : MonoBehaviour
         Instantiate(iaCool);
     }
 
-    public void UndoTurn()
+    public void UndoRedo(bool undo)
     {
-        if (MapManager.instance.undoList.Count == 0) return;
-        
-        var indexToGet = MapManager.instance.undoList.Count;
-        MapManager.instance.mapArray = MapManager.instance.undoList.Peek();
-        MapManager.instance.undoList.Pop();
+        switch (undo)
+        {
+            case true :
+                if (MapManager.instance.undoList.Count == 0)
+                {
+                    break;
+                }
+                var mapWanted = MapManager.instance.undoList.Pop();
+                MapManager.instance.redoList.Push(MapManager.instance.mapArray);
+                MapManager.instance.mapArray = mapWanted;
+                break;
+
+            case false : 
+                Debug.Log("I m doing it");
+                if (MapManager.instance.redoList.Count == 0)
+                {
+                    Debug.Log("I m empty idiot");
+                    break;
+                }
+                mapWanted = MapManager.instance.redoList.Pop();
+                MapManager.instance.undoList.Push(MapManager.instance.mapArray);
+                MapManager.instance.mapArray = mapWanted;
+                break;
+        }
         MapManager.instance.RefreshMap();
     }
 }

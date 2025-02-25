@@ -32,12 +32,13 @@ public class RandomIaController : EntityController
                 break;
             }
         }
+        MapManager.instance.StackMap();
         var spriteRenderer = MapManager.instance.mapArrayInGame[newX,newY].gameObject
             .GetComponent<SpriteRenderer>();
         SwitchForColor(turn, spriteRenderer, newX,newY);
-        MapManager.instance.CheckForWin(newX,newY,turn);
+        MapManager.instance.CheckForWin(newX,newY,turn,true);
         MapManager.instance.CheckForNul();
         GameManager.instance.UpdateTurnText();
-        MapManager.instance.StackMap();
+        
     }
 }

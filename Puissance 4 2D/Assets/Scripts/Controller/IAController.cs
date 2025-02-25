@@ -17,6 +17,7 @@ public class IAController : EntityController
         if (GameManager.instance.currentPlayer != myType || turn == GameManager.GameTurn.Wait) return;
         int newX=0;
         int newY=0;
+        MapManager.instance.StackMap();
         while (true)
         {
             
@@ -32,15 +33,17 @@ public class IAController : EntityController
                 
                 var y = CheckForCollone(new Vector2(i, 3));
               
+                
                 var tokenStocking = MapManager.instance.mapArray[i, y]; 
                 MapManager.instance.mapArray[i,y] = MapManager.TileState.Yellow;
-              if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.You))
+                if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.Ia,true)) 
                 {
-                    newX = i;
                     newY = y;
+                    newX = i;
+                    MapManager.instance.mapArray[i,y] = tokenStocking; 
                     break;
                 }
-                MapManager.instance.mapArray[i,y] = tokenStocking;  
+                MapManager.instance.mapArray[i,y] = tokenStocking; 
               
                 if (EvaluationForActualPlayer(i,y,copyArray) > maxValue)
                 {
@@ -49,6 +52,20 @@ public class IAController : EntityController
                     newY = y;
                     newX = i;
                 }
+                
+                //
+                
+                tokenStocking = MapManager.instance.mapArray[i, y]; 
+                MapManager.instance.mapArray[i,y] = MapManager.TileState.Red;
+                if (MapManager.instance.CheckForWin(i,y,GameManager.GameTurn.You,false)) // Le problem il est la je pense
+                {
+                    newX = i;
+                    newY = y;
+                    MapManager.instance.mapArray[i,y] = tokenStocking; 
+                    break;
+                }
+                MapManager.instance.mapArray[i,y] = tokenStocking;  
+                
             }
             if (newY <= MapManager.instance.h)
             {
@@ -59,12 +76,11 @@ public class IAController : EntityController
         var spriteRenderer = MapManager.instance.mapArrayInGame[newX,newY].gameObject
             .GetComponent<SpriteRenderer>();
         SwitchForColor(turn, spriteRenderer, newX,newY);
-
-        Debug.Log("qjsldkjgqslkj check for win");
-        MapManager.instance.CheckForWin(newX,newY,turn);
+        
+        MapManager.instance.CheckForWin(newX,newY,turn,true);
         MapManager.instance.CheckForNul();
         GameManager.instance.UpdateTurnText();
-        MapManager.instance.StackMap();
+        
     }
     
     
@@ -93,30 +109,24 @@ public class IAController : EntityController
     {
         float cpt = CheckForVN(x, y, copyArray) + CheckForHN(x,y,copyArray) + 
                     CheckForDRN(x,y,copyArray) + CheckForDLN(x,y,copyArray); //condition line
-        var tokenStocking = MapManager.instance.mapArray[x, y]; 
-        MapManager.instance.mapArray[x,y] = MapManager.TileState.Yellow;
-        
-        if (MapManager.instance.CheckForWin(x,y,myType)) //cela déconne ici
+        return cpt;
+    }
+    
+    private float CheckForVN(int x, int y, MapManager.TileState[,] copyArray)
+    {
+        var cpt = 0;
+        var tileStateCurrently = copyArray[x, y];
+
+        for (var i = 1; i < 4; i++) 
         {
-            cpt += 1000;
+            var newY = y - i; 
+            if (newY < 0 || copyArray[x, newY] != tileStateCurrently) break;
+            cpt++;
         }
-        
-        MapManager.instance.mapArray[x,y] = tokenStocking;
+
         return cpt;
     }
 
-    private float CheckForVN(int x,int y,MapManager.TileState[,]copyArray)
-    {
-        var cpt = 0;
-        MapManager.TileState tileStateCurrently = copyArray[x, y];
-        for (var i = 1; i < 4; i++)
-        {
-            var newY = x - i;
-            if (newY < 0 || copyArray[x,newY] != tileStateCurrently)break;
-            cpt += 1;
-        }
-        return cpt;
-    }
 
     private float CheckForHN(int x,int y,MapManager.TileState[,]copyArray)
     {
