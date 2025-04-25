@@ -13,38 +13,71 @@ public class IAController : EntityController
         PlaceJeton(myType);
     }
 
-    private float MiniMax(MapManager.TileState[,] board, int profondeur, bool iaTurn)
+    private int GetBestMove()
     {
-        
-        if (profondeur == profondeurMax) //TODO: check for end game
-        {
-            return EvalBoard(board, iaTurn);  
-        }
-
-        float bestScore = iaTurn ? int.MinValue : int.MaxValue;
+        float bestScore = float.NegativeInfinity;
         int bestColumn = -1;
 
-        for (int i = 0; i < MapManager.instance.w; i++)
+        for (int col = 0; col < MapManager.instance.w; col++)
         {
-            if (IsColumnFull(i)) continue;
+            int row = GetLowestEmptyRow(col, MapManager.instance.mapArray);
+            if (row == -1) continue;
 
-            int y = CheckForCollone(new Vector2(i, 3));
-            var boardCopy = DeepCopyArray(board);
-            
-            boardCopy[i, y] = iaTurn ? MapManager.TileState.Yellow : MapManager.TileState.Red;
+            var boardCopy = DeepCopyArray(MapManager.instance.mapArray);
+            boardCopy[col, row] = MapManager.TileState.Yellow;
 
-            float eval = MiniMax(boardCopy, profondeur + 1, !iaTurn);
+            float score = MiniMax(boardCopy, 1, false); 
 
-            
-            if ((iaTurn && eval > bestScore) || (!iaTurn && eval < bestScore))
+            if (score > bestScore)
             {
-                bestScore = eval;
-                bestColumn = i;
+                bestScore = score;
+                bestColumn = col;
             }
         }
 
-        return profondeur == 0 ? bestColumn : bestScore; 
+        return bestColumn;
     }
+
+    
+    private float MiniMax(MapManager.TileState[,] board, int profondeur, bool iaTurn)
+    {
+        if (profondeur == profondeurMax)
+        {
+            return EvalBoard(board, iaTurn);
+        }
+
+        float bestValue = iaTurn ? float.NegativeInfinity : float.PositiveInfinity;
+
+        for (int col = 0; col < MapManager.instance.w; col++)
+        {
+            int row = GetLowestEmptyRow(col, board);
+            if (row == -1) continue;
+
+            MapManager.TileState[,] boardCopy = board.Clone() as MapManager.TileState[,];
+            MapManager.TileState currentPlayer = iaTurn ? MapManager.TileState.Yellow : MapManager.TileState.Red;
+            boardCopy[col, row] = currentPlayer;
+
+            // Vérifie si ce coup donne une victoire immédiate
+            if (CheckWinSimulated(col, row, boardCopy, currentPlayer))
+            {
+                return iaTurn ? 10000 - profondeur : -10000 + profondeur;
+            }
+
+            float eval = MiniMax(boardCopy, profondeur + 1, !iaTurn);
+
+            if (iaTurn)
+            {
+                bestValue = Mathf.Max(bestValue, eval);
+            }
+            else
+            {
+                bestValue = Mathf.Min(bestValue, eval);
+            }
+        }
+
+        return bestValue;
+    }
+
 
 
     private float EvalBoard(MapManager.TileState[,] board, bool iaTurn)
@@ -76,12 +109,16 @@ public class IAController : EntityController
         MapManager.instance.StackMap();
 
         // Trouver le meilleur coup avec MiniMax
-        int bestMove = (int)MiniMax(MapManager.instance.mapArray, 0, true);
-
+        int bestMove = GetBestMove();
         if (bestMove == -1) return;
-        int newY = CheckForCollone(new Vector2(bestMove, 3));
+
+        int newY = GetLowestEmptyRow(bestMove, MapManager.instance.mapArray);
+        if (newY == -1) return;
+
         PlaceJetonAt(bestMove, newY, turn);
+
     }
+
 
     
     /*
@@ -285,4 +322,61 @@ public class IAController : EntityController
 
         return cpt;
     }
+    
+    private int GetLowestEmptyRow(int col, MapManager.TileState[,] board)
+    {
+        int width = board.GetLength(0);
+        int height = board.GetLength(1);
+
+        if (col < 0 || col >= width)
+        {
+            Debug.LogWarning($"Colonne invalide: {col} (width: {width})");
+            return -1;
+        }
+
+        for (int row = 0; row < height; row++)
+        {
+            if (board[col, row] == MapManager.TileState.Empty)
+                return row;
+        }
+
+        return -1;
+    }
+
+    
+    private bool CheckWinSimulated(int x, int y, MapManager.TileState[,] board, MapManager.TileState player)
+    {
+        int[][] directions = new int[][] {
+            new int[] { 1, 0 },  // horizontal
+            new int[] { 0, 1 },  // vertical
+            new int[] { 1, 1 },  // diagonal /
+            new int[] { 1, -1 }  // diagonal \
+        };
+
+        foreach (var dir in directions)
+        {
+            int count = 1;
+
+            for (int d = -1; d <= 1; d += 2)
+            {
+                int dx = dir[0] * d;
+                int dy = dir[1] * d;
+                int nx = x + dx;
+                int ny = y + dy;
+
+                while (nx >= 0 && ny >= 0 && nx < MapManager.instance.w && ny < MapManager.instance.h && board[nx, ny] == player)
+                {
+                    count++;
+                    nx += dx;
+                    ny += dy;
+                }
+            }
+
+            if (count >= 4)
+                return true;
+        }
+
+        return false;
+    }
+
 }

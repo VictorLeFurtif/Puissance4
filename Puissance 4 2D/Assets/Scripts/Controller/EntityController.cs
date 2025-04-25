@@ -40,22 +40,27 @@ public abstract class EntityController : MonoBehaviour
 
     protected int CheckForCollone(Vector2 objectPlace)
     {
-        if (objectPlace.y == 0 && MapManager.instance.mapArray[(int)objectPlace.x,(int)objectPlace.y] 
-            == MapManager.TileState.Empty)
+        int x = (int)objectPlace.x;
+        int y = (int)objectPlace.y;
+
+        if (x < 0 || x >= MapManager.instance.w || y < 0 || y >= MapManager.instance.h)
+            return -1;
+
+        if (y == 0 && MapManager.instance.mapArray[x, y] == MapManager.TileState.Empty)
         {
             return 0;
         }
-        
-        for (var i = 0; i < 6; i++)
+
+        for (var i = 0; i < MapManager.instance.h; i++)
         {
-            if (MapManager.instance.mapArray[(int)objectPlace.x,i] == MapManager.TileState.Red || MapManager.instance.mapArray[(int)objectPlace.x,i] == MapManager.TileState.Yellow)
+            if (MapManager.instance.mapArray[x, i] == MapManager.TileState.Empty)
             {
-                  continue;
+                return i;
             }
-            return i;
         }
 
-        return 0;
+        return -1; 
     }
+
     
 }
