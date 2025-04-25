@@ -185,17 +185,23 @@ public class MapManager : MonoBehaviour
     }
 
     
-    private bool CheckForV(int x, int y)
-    {
+    private bool CheckForV(int x, int y) {
         TileState tileStateCurrently = mapArray[x, y];
-        if (tileStateCurrently == TileState.Empty) return false; 
+        if (tileStateCurrently == TileState.Empty) return false;
 
-        int cpt = 1; 
+        int cpt = 1;
+    
         
-        for (int i = 1; i < 4; i++)
-        {
+        for (int i = 1; i < 4; i++) {
             int newY = y - i;
             if (newY < 0 || mapArray[x, newY] != tileStateCurrently) break;
+            cpt++;
+        }
+    
+        
+        for (int i = 1; i < 4; i++) {
+            int newY = y + i;
+            if (newY >= h || mapArray[x, newY] != tileStateCurrently) break;
             cpt++;
         }
     
